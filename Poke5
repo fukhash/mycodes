@@ -1,5 +1,3 @@
-
-
 from uagame import Window
 from pygame import QUIT, Color, time, MOUSEBUTTONUP
 from pygame.time import Clock
@@ -8,15 +6,12 @@ from pygame.draw import circle as draw_circle
 from pygame.draw import rect as draw_rect
 from pygame import Rect
 from random import randint as random
-from time import sleep
 import math
-
 
 
 def main():
     game = Game()
     game.play()
-
 
 
 class Game:
@@ -45,7 +40,6 @@ class Game:
             if event.type == MOUSEBUTTONUP:
                 self.mouse_up = True
 
-
     def play(self):
         while not self.close_selected:
             self.handle_events()
@@ -53,13 +47,13 @@ class Game:
                 self.draw_game()
                 self.update()
 
+
     def draw_game(self):
         self.window.clear()
         self.draw_score()
         self.small_dot.draw()
         self.big_dot.draw()
         self.window.update()
-
 
     def colide(self):
         # position is a list with the center and radius dot parameters, with the content [center_0, center_1, radius]
@@ -99,9 +93,7 @@ class Game:
         draw_rect(self.window.get_surface(), color, rect)
         self.window.set_bg_color(Dot.color(self.big_dot))
 
-
     def gameover(self):
-        # - compute and draw game over when the dots colide
         height = self.window.get_height() - self.window.get_font_height()
         self.window.set_font_color(Dot.color(self.small_dot))
         self.gameover_bg()
@@ -109,11 +101,12 @@ class Game:
         self.window.update()
         self.game_over = True
 
-
     def update(self):
         self.colide()
-        Dot.move(self.small_dot, self.mouse_up)
-        Dot.move(self.big_dot, self.mouse_up)
+        Dot.randomize(self.small_dot, self.mouse_up)
+        Dot.randomize(self.big_dot, self.mouse_up)
+        Dot.move(self.small_dot)
+        Dot.move(self.big_dot)
         self.mouse_up = False
         self.clock.tick(self.frame_rate)
 
@@ -127,7 +120,7 @@ class Dot:
         self._window = window
 
     def position(self):
-        # - get a list with center[0], center[1], radius
+        # get a list with center[0], center[1], radius
         center_0 = self._center[0]
         center_1 = self._center[1]
         radius = self._radius
@@ -143,17 +136,16 @@ class Dot:
         color = Color(self._color)
         draw_circle(surface, color, self._center, self._radius)
 
-    def move(self, mouse_up):
+    def move(self):
         size = [self._window.get_width(), self._window.get_height()]
-        # - randomize dots if mouse click
-        if mouse_up:
-            self._center[0] = random(self._radius, (size[0] - self._radius))
-            self._center[1] = random(self._radius, (size[1] - self._radius))
-        # - calculate velocity
+        # calculate velocity
         for index in range(0, 2):
             self._center[index] += self._velocity[index]
             if (self._center[index] + self._radius >= size[index]) or (self._center[index] - self._radius <= 0):
                 self._velocity[index] = - self._velocity[index]
 
-
-main()
+    def randomize(self, mouse_up):
+        size = [self._window.get_width(), self._window.get_height()]
+        if mouse_up:
+            self._center[0] = random(self._radius, (size[0] - self._radius))
+            self._center[1] = random(self._radius, (size[1] - self._radius))
